@@ -1,3 +1,4 @@
+import shlex
 from importlib import resources
 from importlib.resources.abc import Traversable
 from pathlib import Path
@@ -96,37 +97,35 @@ def install(
         )
 
         archive = f"alertmanager-{version}.linux-amd64.tar.gz"
+        archive_path = f"{DOWNLOAD_DIR}/{archive}"
 
         files.download(
             name="Download alertmanager release binary",
             src=f"https://github.com/prometheus/alertmanager/releases/download/v{version}/{archive}",
-            dest=f"{DOWNLOAD_DIR}/{archive}",
+            dest=archive_path,
         )
 
         release_dir = f"/tmp/alertmanager-{version}.linux-amd64"
 
-        # dest is "/tmp" (not DOWNLOAD_DIR): files.unarchive checks the dest
-        # directory exists at operation-prepare time, which runs before the
-        # "Prepare local download path" op above has actually created
-        # DOWNLOAD_DIR on the remote. "/tmp" always exists already, so it
-        # sidesteps that ordering issue.
-        files.unarchive(
+        # files.unarchive/files.move hard-fail if their src/dest doesn't already
+        # exist per a fact check, and that check runs when pyinfra builds its
+        # change-detection preview (i.e. before any operation's commands have
+        # actually executed) unless the deploy is run with `-y`. That makes them
+        # unsafe here: the archive/binaries are created earlier in this very run.
+        # server.shell has no such pre-check, so use raw commands instead.
+        server.shell(
             name="Unarchive alertmanager release binary",
-            src=f"{DOWNLOAD_DIR}/{archive}",
-            dest="/tmp",
-            remote_src=True,
+            commands=[f"tar -xzf {shlex.quote(archive_path)} -C {shlex.quote('/tmp')}"],
         )
 
-        files.move(
-            name="Move alertmanager binary",
-            src=f"{release_dir}/alertmanager",
-            dest="/usr/local/bin",
-        )
+        def move_binary(binary_name: str) -> str:
+            src = shlex.quote(f"{release_dir}/{binary_name}")
+            dest = shlex.quote(f"/usr/local/bin/{binary_name}")
+            return f"mv {src} {dest}"
 
-        files.move(
-            name="Move amtool binary",
-            src=f"{release_dir}/amtool",
-            dest="/usr/local/bin",
+        server.shell(
+            name="Move alertmanager and amtool binaries",
+            commands=[move_binary("alertmanager"), move_binary("amtool")],
         )
 
         files.directory(name="Clear download path", path=DOWNLOAD_DIR, present=False)
