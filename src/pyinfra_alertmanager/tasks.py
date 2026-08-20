@@ -103,12 +103,17 @@ def install(
             dest=f"{DOWNLOAD_DIR}/{archive}",
         )
 
-        release_dir = f"{DOWNLOAD_DIR}/alertmanager-{version}.linux-amd64"
+        release_dir = f"/tmp/alertmanager-{version}.linux-amd64"
 
+        # dest is "/tmp" (not DOWNLOAD_DIR): files.unarchive checks the dest
+        # directory exists at operation-prepare time, which runs before the
+        # "Prepare local download path" op above has actually created
+        # DOWNLOAD_DIR on the remote. "/tmp" always exists already, so it
+        # sidesteps that ordering issue.
         files.unarchive(
             name="Unarchive alertmanager release binary",
             src=f"{DOWNLOAD_DIR}/{archive}",
-            dest=DOWNLOAD_DIR,
+            dest="/tmp",
             remote_src=True,
         )
 
@@ -125,6 +130,9 @@ def install(
         )
 
         files.directory(name="Clear download path", path=DOWNLOAD_DIR, present=False)
+        files.directory(
+            name="Clear extracted release directory", path=release_dir, present=False
+        )
 
     unit = files.template(
         name="Copy alertmanager systemd unit file",
