@@ -1,0 +1,24 @@
+[Unit]
+Description=Alertmanager service
+After=network.target
+
+[Service]
+Type=simple
+User={{ alertmanager_system_user }}
+Group={{ alertmanager_system_group }}
+ExecStart=/usr/local/bin/alertmanager {% for flag, flag_value in alertmanager_service_args.items() %}--{{ flag }}{% if flag_value is not none %}={{ flag_value }}{% endif %} {% endfor %}
+
+SyslogIdentifier=alertmanager
+Restart=always
+
+# Sandboxing: restrict the process's access to the rest of the system.
+PrivateTmp=yes
+ProtectHome=yes
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+
+[Install]
+WantedBy=multi-user.target
