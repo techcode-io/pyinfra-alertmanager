@@ -1,9 +1,9 @@
 import shlex
+from collections.abc import Mapping
 from importlib import resources
-from importlib.resources.abc import Traversable
 from pathlib import Path
 from types import MappingProxyType
-from typing import Final
+from typing import Any, Final
 
 from pyinfra.api import deploy
 from pyinfra.context import host
@@ -21,7 +21,7 @@ DOWNLOAD_DIR: Final[str] = "/tmp/alertmanager"
 DEFAULT_VERSION: Final[str] = "0.34.0"
 DEFAULT_SYSTEM_USER: Final[str] = "alertmanager"
 DEFAULT_SYSTEM_GROUP: Final[str] = "alertmanager"
-DEFAULT_SERVICE_ARGS = MappingProxyType(
+DEFAULT_SERVICE_ARGS: Final[Mapping[str, str]] = MappingProxyType(
     {
         "web.listen-address": "127.0.0.1:9093",
         "config.file": CONFIG_PATH,
@@ -32,7 +32,7 @@ DEFAULT_CONFIG_TEMPLATE: Final[str] = str(
     resources.files("pyinfra_alertmanager") / "templates" / "config.yml.j2"
 )
 
-_TEMPLATE: Final[Traversable] = (
+_TEMPLATE: Final[str] = str(
     resources.files("pyinfra_alertmanager") / "templates" / "alertmanager.service.j2"
 )
 
@@ -42,9 +42,9 @@ def install(
     version: str = DEFAULT_VERSION,
     system_user: str = DEFAULT_SYSTEM_USER,
     system_group: str = DEFAULT_SYSTEM_GROUP,
-    service_args: dict | None = None,
+    service_args: Mapping[str, str] | None = None,
     config_template: str | Path = DEFAULT_CONFIG_TEMPLATE,
-    config_context: dict | None = None,
+    config_context: dict[str, Any] | None = None,
 ):
     server.group(
         name="Create alertmanager system group",
@@ -84,7 +84,7 @@ def install(
         dest=CONFIG_PATH,
         user=system_user,
         group=system_group,
-        **(config_context if config_context is not None else {}),
+        **(config_context or {}),
     )
 
     binary_changed = host.get_fact(AlertManagerVersion) != version
@@ -135,13 +135,11 @@ def install(
 
     unit = files.template(
         name="Copy alertmanager systemd unit file",
-        src=str(_TEMPLATE),
+        src=_TEMPLATE,
         dest=UNIT_PATH,
-        alertmanager_system_user=system_user,
-        alertmanager_system_group=system_group,
-        alertmanager_service_args=service_args
-        if service_args is not None
-        else DEFAULT_SERVICE_ARGS,
+        alertmanager_system_user=system_user,  # type: ignore[arg-type]
+        alertmanager_system_group=system_group,  # type: ignore[arg-type]
+        alertmanager_service_args=service_args or DEFAULT_SERVICE_ARGS,  # type: ignore[arg-type]
     )
 
     if unit.changed:

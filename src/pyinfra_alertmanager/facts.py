@@ -16,7 +16,8 @@ class AlertManagerVersion(FactBase):
     alertmanager is not installed.
     """
 
-    def command(self) -> str:
+    @staticmethod
+    def command() -> str:
         return f"{BINARY_PATH} --version 2>&1"
 
     def requires_command(self) -> str:
