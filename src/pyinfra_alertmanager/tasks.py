@@ -9,7 +9,7 @@ from pyinfra.api import deploy
 from pyinfra.context import host
 from pyinfra.operations import files, server, systemd
 
-from pyinfra_alertmanager.facts import BINARY_PATH, AlertmanagerVersion
+from pyinfra_alertmanager.facts import BINARY_PATH, AlertManagerVersion
 
 UNIT_PATH: Final[str] = "/etc/systemd/system/alertmanager.service"
 AMTOOL_BINARY_PATH: Final[str] = "/usr/local/bin/amtool"
@@ -87,7 +87,7 @@ def install(
         **(config_context if config_context is not None else {}),
     )
 
-    binary_changed = host.get_fact(AlertmanagerVersion) != version
+    binary_changed = host.get_fact(AlertManagerVersion) != version
     if binary_changed:
         files.directory(
             name="Prepare local download path",

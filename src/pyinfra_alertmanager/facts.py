@@ -10,7 +10,7 @@ _VERSION_MATCHER: Final[re.Pattern] = re.compile(
 )
 
 
-class AlertmanagerVersion(FactBase):
+class AlertManagerVersion(FactBase):
     """
     Returns the currently installed alertmanager version (eg ``0.30.1``), or ``None`` if
     alertmanager is not installed.

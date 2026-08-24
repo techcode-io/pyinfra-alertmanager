@@ -51,7 +51,7 @@ Source lives under `src/pyinfra_alertmanager/` (src layout, `uv_build` backend):
   `DEFAULT_CONFIG_TEMPLATE` (`templates/config.yml.j2`) is a minimal valid config (a single
   `default` receiver with no integrations) so `install()` still works out of the box; callers pass
   their own template path (and context) via `config_template`/`config_context`.
-- **`facts.py`** — `AlertmanagerVersion`, a pyinfra `FactBase` that runs `alertmanager --version`
+- **`facts.py`** — `AlertManagerVersion`, a pyinfra `FactBase` that runs `alertmanager --version`
   and parses the installed version, gated by `requires_command` so it returns `None` cleanly when
   the binary isn't present yet. Also owns `BINARY_PATH`, the one path constant shared with
   `tasks.py` (imported from there, not the other way — `facts.py` has no dependency on `tasks.py`,
@@ -62,7 +62,7 @@ Source lives under `src/pyinfra_alertmanager/` (src layout, `uv_build` backend):
   `importlib.resources.files("pyinfra_alertmanager")` (not a `__file__`-relative path) so it works
   both editable and installed as a wheel.
 - **`__init__.py`** — re-exports the public surface: `install`, `uninstall`,
-  `AlertmanagerVersion`, and the `DEFAULT_*` constants.
+  `AlertManagerVersion`, and the `DEFAULT_*` constants.
 
 The upstream release archive also ships `amtool`; `install()`/`uninstall()` manage it alongside
 `alertmanager` itself (same download, same removal).
