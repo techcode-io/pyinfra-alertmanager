@@ -56,5 +56,5 @@ help = "Run all tests."
 cmd = "pytest tests"
 
 [tool.poe.tasks."project:upgrade"]
-help = "Bump DEFAULT_VERSION to the latest upstream alertmanager release."
+help = "Bump DEFAULT_VERSION to the latest upstream alertmanager release and .python-version to its latest patch."
 script = "scripts.project:upgrade"

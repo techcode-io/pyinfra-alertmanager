@@ -10,9 +10,11 @@ import urllib3
 REPO_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
 TASKS_PATH: Final[Path] = REPO_ROOT / "src" / "pyinfra_alertmanager" / "tasks.py"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"
+PYTHON_VERSION_PATH: Final[Path] = REPO_ROOT / ".python-version"
 LATEST_RELEASE_URL: Final[str] = (
     "https://api.github.com/repos/prometheus/alertmanager/releases/latest"
 )
+PYTHON_RELEASES_URL: Final[str] = "https://endoflife.date/api/python.json"
 VERSION_PATTERN: Final[re.Pattern] = re.compile(
     r'^(?P<prefix>DEFAULT_VERSION(?::\s*Final\[str\])?\s*=\s*)"[^"]+"$', re.MULTILINE
 )
@@ -30,7 +32,22 @@ def fetch_latest_version() -> str:
     return response.json()["tag_name"].removeprefix("v")
 
 
-def upgrade() -> None:
+def fetch_latest_python_version(current: str) -> str:
+    """Return the latest patch release for the same major.minor cycle as ``current``."""
+    major_minor = ".".join(current.split(".")[:2])
+    response = urllib3.request("GET", PYTHON_RELEASES_URL)
+    for cycle in response.json():
+        if cycle["cycle"] == major_minor:
+            return str(cycle["latest"])
+
+    print(
+        f"Could not find Python {major_minor} release cycle at {PYTHON_RELEASES_URL}",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+
+def upgrade_alertmanager() -> None:
     """Bump DEFAULT_VERSION in tasks.py and README.md to the latest upstream alertmanager release."""
     latest = fetch_latest_version()
     content = TASKS_PATH.read_text()
@@ -57,3 +74,24 @@ def upgrade() -> None:
 
     README_PATH.write_text(readme_updated)
     print(f"DEFAULT_VERSION set to {latest} in {README_PATH.relative_to(REPO_ROOT)}")
+
+
+def upgrade_python() -> None:
+    """Bump .python-version to the latest patch release of the currently pinned cycle."""
+    current = PYTHON_VERSION_PATH.read_text().strip()
+    latest = fetch_latest_python_version(current)
+
+    if latest == current:
+        print(f"Already at the latest Python version ({current})")
+        return
+
+    PYTHON_VERSION_PATH.write_text(f"{latest}\n")
+    print(
+        f"Python version set to {latest} in {PYTHON_VERSION_PATH.relative_to(REPO_ROOT)}"
+    )
+
+
+def upgrade() -> None:
+    """Bump DEFAULT_VERSION in tasks.py/README.md and .python-version to their latest releases."""
+    upgrade_alertmanager()
+    upgrade_python()
