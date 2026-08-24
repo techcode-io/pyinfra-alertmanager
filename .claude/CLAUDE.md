@@ -26,6 +26,9 @@ Managed with `uv`; a `poethepoet` task runner wraps the common commands (`pyproj
 - `uv run pytest tests/e2e/test_tasks.py::test_install_then_uninstall -v` — run the single e2e test
 - `uv run poe env:configure` — install pre-commit hooks (ruff-check, ruff-format, LF line endings,
   gitlint) for local development
+- `uv run poe project:upgrade` — bump `DEFAULT_VERSION` (in `tasks.py` and the README) to the
+  latest upstream `alertmanager` release, and `.python-version` to its latest patch, via
+  `scripts/project.py`
 
 Always invoke tools through `uv run <tool>` (or the `poe` tasks above). Do not call
 `.venv/bin/<tool>` directly — `uv run` is what keeps the environment synced with `pyproject.toml`/
@@ -79,7 +82,7 @@ arch support only if actually asked for.
 because the whole point of `install()`/`uninstall()` is systemd unit management, which a bare
 Docker container can't exercise.
 
-- `tests/fixtures/systemd/Containerfile` builds a minimal systemd-enabled Debian 12 image.
+- `tests/fixtures/systemd/Containerfile` builds a minimal systemd-enabled Debian 13 image.
 - `tests/e2e/conftest.py`'s `systemd_container` fixture builds that image, starts a
   `--privileged --cgroupns=host` container with `/sys/fs/cgroup` mounted, polls
   `systemctl is-system-running` until ready, and yields the container name; the whole module
