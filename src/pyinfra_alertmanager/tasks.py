@@ -142,14 +142,14 @@ def install(
         alertmanager_service_args=service_args or DEFAULT_SERVICE_ARGS,  # type: ignore[arg-type]
     )
 
-    if unit.changed:
+    if unit.will_change:
         systemd.daemon_reload(name="Reload systemd daemon")
 
     systemd.service(
         name="Restart and enable the alertmanager service",
         service="alertmanager.service",
         running=True,
-        restarted=config.changed or binary_changed or unit.changed,
+        restarted=config.will_change or binary_changed or unit.will_change,
         enabled=True,
     )
 
@@ -172,7 +172,7 @@ def uninstall(
         present=False,
     )
 
-    if unit.changed:
+    if unit.will_change:
         systemd.daemon_reload(name="Reload systemd daemon")
 
     files.file(
