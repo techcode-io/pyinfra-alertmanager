@@ -162,7 +162,7 @@ uninstall()
 from pyinfra_alertmanager import DEFAULT_SERVICE_ARGS, install
 
 install(
-    version="0.34.0",
+    version="0.34.1",
     system_user="alertmanager",
     system_group="alertmanager",
     service_args={
@@ -193,7 +193,7 @@ receivers:
 |------------------------|---------------------|-----------------------------|-----------------------------------------------------------------------------|
 | `install`, `uninstall` | `system_user`       | `alertmanager`              | System user running the service                                             |
 | `install`, `uninstall` | `system_group`      | `alertmanager`              | System group running the service                                            |
-| `install`              | `version`           | `0.34.0`                    | alertmanager release version to download                                    |
+| `install`              | `version`           | `0.34.1`                    | alertmanager release version to download                                    |
 | `install`              | `service_args`      | `DEFAULT_SERVICE_ARGS`      | Dict of `--flag: value` (or `None` for a bare flag) passed to `alertmanager` |
 | `install`              | `config_template`   | `DEFAULT_CONFIG_TEMPLATE`   | Path to a Jinja2 template rendered to `/etc/alertmanager/config.yml`         |
 | `install`              | `config_context`    | `None`                      | Dict of variables passed to `config_template` when rendering                |
