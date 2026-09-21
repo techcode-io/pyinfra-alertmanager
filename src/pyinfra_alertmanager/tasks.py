@@ -18,7 +18,7 @@ CONFIG_PATH: Final[str] = f"{CONFIG_DIR}/config.yml"
 STORAGE_DIR: Final[str] = "/var/lib/alertmanager"
 DOWNLOAD_DIR: Final[str] = "/tmp/alertmanager"
 
-DEFAULT_VERSION: Final[str] = "0.34.0"
+DEFAULT_VERSION: Final[str] = "0.34.1"
 DEFAULT_SYSTEM_USER: Final[str] = "alertmanager"
 DEFAULT_SYSTEM_GROUP: Final[str] = "alertmanager"
 DEFAULT_SERVICE_ARGS: Final[Mapping[str, str]] = MappingProxyType(
