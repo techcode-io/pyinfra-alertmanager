@@ -1,6 +1,7 @@
 [general]
 # Ref: https://jorisroovers.com/gitlint/latest/configuration/
 ignore=body-is-missing
+regex-style-search=True
 
 [title-max-length]
 line-length=80
@@ -10,3 +11,7 @@ min-length=5
 
 [title-match-regex]
 regex=^(build|ci|docs|feat|fix|perf|refactor|test|chore|release)
+
+[ignore-body-lines]
+# Bot trailers (e.g. Dependabot++ Signed-off-by) routinely exceed the body line limit
+regex=^Signed-off-by:
